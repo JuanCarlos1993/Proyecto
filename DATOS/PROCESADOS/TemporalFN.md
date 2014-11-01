@@ -1,7 +1,7 @@
 # Diccionario de datos
 A continuacion se describen las variables utilizadas:
 <!-- html table generated in R 3.1.1 by xtable 1.7-4 package -->
-<!-- Fri Oct 31 23:28:48 2014 -->
+<!-- Sat Nov  1 00:02:40 2014 -->
 <table border=1>
 <tr> <th>  </th> <th> Variable </th> <th> Descripcion de la variable </th> <th> Liga </th>  </tr>
   <tr> <td align="right"> 1 </td> <td> Salud </td> <td> Secretaría de la Salud </td> <td> http://www.salud.gob.mx/ </td> </tr>

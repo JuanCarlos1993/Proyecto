@@ -1,1 +1,17 @@
 load("/Users/jcdf_resident/Documents/ITAM/Estadística Aplicada I/Ejercicios en clase/1408_PROYECTO_TEMBLORES/DATOS/PROCESADOS/MapaMexico.RData")
+load("/Users/jcdf_resident/Documents/ITAM/Estadística Aplicada I/Proyecto/DATOS/PROCESADOS/Archivo.RData")
+x
+y
+z
+load("/Users/jcdf_resident/Documents/ITAM/Estadística Aplicada I/Proyecto/DATOS/PROCESADOS/Archivo.RData")
+z
+load("/Users/jcdf_resident/Documents/ITAM/Estadística Aplicada I/Proyecto/DATOS/PROCESADOS/Archivo.RData")
+head(x)
+head(y)
+head(z)
+head(x1)
+load("/Users/jcdf_resident/Documents/ITAM/Estadística Aplicada I/Proyecto/DATOS/PROCESADOS/Archivo.RData")
+head(x1)
+head(y1)
+head(z1)
+y1
