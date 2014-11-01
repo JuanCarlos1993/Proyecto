@@ -1,34 +1,34 @@
-Estado ,Salud,IMSS-Ord,ISSSTE,FuentedeNotificaci¢nIMSS-Op,DIF,PEMEX,SEDENA,SEMAR,Otras,Total
-Aguascalientes ,967,11,3,S.R.,0,S.R.,0,S.R.,1,982
-Baja California ,22,33,1,4,S.R.,S.R.,0,0,3,63
-Baja California Sur ,16,5,3,S.R.,S.R.,S.R.,0,0,S.R.,24
-Campeche ,9,14,1,3,0,0,0,0,2,29
-Coahuila ,21,72,0,5,0,S.R.,0,S.R.,2,100
-Colima ,4764,1679,32,S.R.,0,S.R.,9,18,71,6573
-Chiapas ,64,47,8,13,S.R.,1,0,0,3,136
-Chihuahua ,60,30,5,65,S.R.,S.R.,1,S.R.,20,181
-Distrito Federal ,217,8,19,0,0,0,0,0,17,261
-Durango ,3974,18,0,664,0,S.R.,0,0,2,4658
-Guanajuato ,10179,2959,224,0,S.R.,24,49,S.R.,1610,15045
-Guerrero ,29105,1405,656,254,S.R.,S.R.,54,5,0,31479
-Hidalgo ,88,0,0,7,0,0,0,S.R.,0,95
-Jalisco ,19814,5350,83,0,0,0,11,0,2276,27534
-M‚xico ,5318,56,8,2,2,S.R.,2,S.R.,192,5580
-Michoac n ,8400,3195,405,5279,S.R.,S.R.,0,10,S.R.,17289
-Morelos ,14520,2177,488,0,S.R.,S.R.,21,S.R.,S.R.,17206
-Nayarit ,4874,1409,91,2427,3,S.R.,0,0,0,8804
-Nuevo Le¢n ,24,36,0,0,S.R.,0,0,S.R.,8,68
-Oaxaca ,1282,57,73,1045,0,0,3,9,3,2472
-Puebla ,4052,389,31,1992,0,0,0,S.R.,31,6495
-Quer‚taro ,1007,1516,66,0,1,S.R.,0,S.R.,26,2616
-Quintana Roo ,28,13,8,S.R.,S.R.,S.R.,0,0,0,49
-San Luis Potos¡ ,59,44,1,30,S.R.,0,0,S.R.,7,141
-Sinaloa ,1900,898,72,1170,1,0,5,6,393,4445
-Sonora ,1503,701,33,0,S.R.,S.R.,0,7,116,2360
-Tabasco ,5,9,1,S.R.,S.R.,0,0,0,3,18
-Tamaulipas ,97,83,0,16,3,1,1,0,0,201
-Tlaxcala ,10,12,1,0,0,S.R.,0,S.R.,0,23
-Veracruz ,56,40,2,9,0,0,0,0,0,107
-Yucat n ,1,7,0,7,0,S.R.,0,0,0,15
-Zacatecas ,1317,67,5,673,0,S.R.,6,S.R.,0,2068
-TOTAL GLOBAL ,113753,22340,2320,13665,10,26,162,55,4786,157117
+Estado,Salud,IMSS-Ord,ISSSTE,IMSS-Op,DIF,PEMEX,SEDENA,SEMAR,Otras,Total
+Aguascalientes ,1016,76,6,S.R.,0,S.R.,0,S.R.,5,1103
+Baja California ,26,28,0,8,S.R.,S.R.,0,0,0,62
+Baja California Sur ,38,9,7,S.R.,S.R.,S.R.,0,0,S.R.,54
+Campeche ,14,10,4,1,0,0,0,0,1,30
+Coahuila ,21,66,1,6,1,S.R.,2,S.R.,5,102
+Colima ,4869,1827,20,S.R.,0,S.R.,1,23,62,6802
+Chiapas ,62,54,9,15,S.R.,0,0,2,2,144
+Chihuahua ,88,33,3,75,S.R.,S.R.,0,S.R.,10,209
+Distrito Federal ,151,3,17,1,4,0,0,0,32,208
+Durango ,3275,28,4,529,0,S.R.,S.R.,0,0,3836
+Guanajuato ,11258,3198,202,0,S.R.,29,21,S.R.,1272,15980
+Guerrero ,25470,2621,689,79,S.R.,S.R.,58,3,0,28920
+Hidalgo ,86,1,0,13,0,0,0,S.R.,1,101
+Jalisco ,19648,4893,62,0,0,0,8,1,2487,27099
+Mexico ,4833,41,9,3,4,S.R.,1,S.R.,204,5095
+Michoacan ,7221,3297,431,5804,S.R.,S.R.,4,15,S.R.,16772
+Morelos ,14412,1149,457,0,S.R.,S.R.,24,S.R.,S.R.,16042
+Nayarit ,4667,1364,109,2480,0,S.R.,0,1,7,8628
+Nuevo Leon ,32,49,0,0,S.R.,0,0,S.R.,19,100
+Oaxaca ,1204,74,71,959,0,0,2,5,3,2318
+Puebla ,5014,459,29,1742,0,1,0,S.R.,29,7274
+Querataro ,1038,1555,40,0,0,S.R.,0,S.R.,38,2671
+Quintana Roo ,20,15,10,S.R.,S.R.,S.R.,0,0,0,45
+San Luis PotosÃ­ ,84,39,2,41,S.R.,0,0,S.R.,3,169
+Sinaloa ,2226,936,78,1307,3,0,8,8,268,4834
+Sonora ,1415,841,51,0,S.R.,S.R.,0,0,135,2442
+Tabasco ,8,16,0,S.R.,S.R.,0,0,0,2,26
+Tamaulipas ,86,61,0,28,15,0,1,4,0,195
+Tlaxcala ,8,12,2,0,0,S.R.,0,S.R.,0,22
+Veracruz ,41,50,4,14,0,0,0,0,1,110
+Yucatan ,2,10,0,11,0,S.R.,0,0,0,23
+Zacatecas ,1204,53,2,432,0,S.R.,1,S.R.,0,1692
+TOTAL GLOBAL ,109537,22868,2319,13548,27,30,131,62,4586,153108

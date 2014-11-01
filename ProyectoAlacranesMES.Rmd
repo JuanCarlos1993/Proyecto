@@ -1,0 +1,224 @@
+---
+title: "Proyecto"
+author: "Juan Carlos Díaz Flores         c.u:000132965"
+date: "24 de octubre de 2014"
+output: html_document
+---
+
+```{r Ajustes, echo = FALSE, message = FALSE, results = 'hide'}
+directorio <- "/Users/jcdf_resident/Documents/ITAM/Estadística Aplicada I/Proyecto"
+setwd(directorio)
+knitr::opts_knit$set(root.dir = directorio)
+# Opciones del documento.
+knitr::opts_chunk$set(fig.path = "FIGURAS/Figuras_", fig.align = 'center',
+                      fig.width = 12, fig.height = 8, 
+                      cache.path = "CACHE/Cache_", cache = TRUE, 
+                      eval = TRUE, 
+                      warning = FALSE, message = FALSE,
+                      echo = TRUE, 
+                      comment = NA)
+options(scipen=7)
+```
+
+```{r Librerias, results = 'hide', include = FALSE}
+paquetes.utilizados <- c("plyr","reshape2","ggplot2","knitr","ggthemes","scales")
+paquetes.instalados <- rownames(installed.packages())
+paquetes.por.instalar <- setdiff(paquetes.utilizados,paquetes.instalados)
+
+#Instala los paquetes faltantes.
+if(length(paquetes.por.instalar)!=0)install.packages(paquetes.por.instalar)
+
+#Carga los paquetes a utilizar.
+lapply(paquetes.utilizados, library,character.only=TRUE)
+```
+
+```{r Lectura de Archivos}
+mes <- NULL
+
+#Leemos los archivos Generales.
+for (i in 1:11){
+mes[[i]] <- read.csv(paste("./DATOS/BRUTOS/MES/", i+2002,"G.csv",sep=""),sep=",", header= TRUE,stringsAsFactors=TRUE)
+mes[[i]]$ano <- as.numeric(2002+i)
+mes[[i]]$tipo <- "General"
+}
+
+#Leemos los archivos Hombres.
+for (i in 12:22){
+mes[[i]] <- read.csv(paste("./DATOS/BRUTOS/MES/", i+1991,"H.csv",sep=""),sep=",", header= TRUE,stringsAsFactors=TRUE)
+mes[[i]]$ano <- as.numeric(1991+i)
+mes[[i]]$tipo <- "Hombres"
+}
+
+#Leemos los archivos Mujeres.
+for (i in 23:33){
+mes[[i]] <- read.csv(paste("./DATOS/BRUTOS/MES/", i+1980,"M.csv",sep=""),sep=",", header= TRUE,stringsAsFactors=TRUE)
+mes[[i]]$ano <- as.numeric(1980+i)
+mes[[i]]$tipo <- "Mujeres"
+}
+
+#Ponemos el nombre de las variables en todos los arhivos.
+for(i in 1:33){
+  names(mes[[i]]) <- c("Estado", "Total", "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic", "Ano", "Tipo") 
+}
+
+#Convertimos la lista en data frame.
+mes <- ldply(mes, data.frame)
+```
+
+```{r Limpieza}
+#Estados antes de limpieza
+unique(mes$Estado)
+mes$Estado <- gsub("[ ]{1,}$","",mes$Estado)
+mes$Estado <- gsub(".*M.x.*","Mexico",mes$Estado)
+mes$Estado <- gsub(".*Mich.*","Michoacan",mes$Estado)
+mes$Estado <- gsub(".*San.*","SanLuisPotosi",mes$Estado)
+mes$Estado <- gsub(".*Nue.*","NuevoLeon",mes$Estado)
+mes$Estado <- gsub(".*Yuc.*","Yucatan",mes$Estado)
+mes$Estado <- gsub(".*Quer.*","Queretaro",mes$Estado)
+mes$Estado <- gsub(".*Tot.*|.*TOT.*","Total",mes$Estado)
+mes$Estado <- gsub(".*Su.*","BajaCaliforniaSur",mes$Estado)
+mes$Estado <- gsub(".*xico","Mexico",mes$Estado)
+
+mes$Estado <- as.factor(mes$Estado)
+mes$Estado <- ordered(mes$Estado)
+mes$Ano <- as.factor(mes$Ano)
+mes$Ano <- ordered(mes$Ano)
+mes$Tipo <- as.factor(mes$Tipo)
+mes$Tipo <- ordered(mes$Tipo)
+
+unique(mes$Estado)
+```
+
+```{r Validaciones}
+#Número de NA's.
+sum(is.na(mes))
+
+#Completitud.
+mean(is.na(mes))
+
+#Casillas con NA's.
+sum(which(is.na(mes)))
+
+#Faltantes por variable.
+sapply(mes, function(x) {mean(is.na(x))}) 
+
+#Número de registros duplicados.
+sum(duplicated(mes))
+
+#Proporción de registros duplicado.
+mean(duplicated(mes))
+
+#Validación de que Masculino+Femenino=General.
+tipo <- aggregate(.~ Tipo,data=mes, sum)
+
+for (i in 3:15){
+tipo[4,i] <- tipo[1,i]-tipo[2,i]-tipo[3,i]
+}
+
+tipo
+
+#Validación de suma de fuentes = Total.
+general <- 0
+hombres <- 0
+mujeres <- 0
+for(i in 4:15){
+  general <- general+tipo[1,i]
+  hombres <- hombres+tipo[2,i]
+  mujeres <- mujeres+tipo[3,i]
+}
+
+tipo$total.sumado <- 0
+tipo[1,17] <- general
+tipo[2,17] <- hombres
+tipo[3,17] <- mujeres
+
+tipo$diferencia.totales <- 0
+tipo[1,18]=tipo[1,17]-tipo[1,3]
+tipo[2,18]=tipo[2,17]-tipo[2,3]
+tipo[3,18]=tipo[3,17]-tipo[3,3]
+
+tipo[c(1,2,3),c(3,17,18)]
+
+#Vemos que las diferencias en ambas validaciones son 0's, por lo que la información es verídica. La prueba de rangos indica que igual estan estructurados de manera correcta, ninguna fuente proporcionó mas datos que el total reportado.
+```
+
+```{r Gráficas y Organización}
+mes1 <- mes
+mes1$Total <- NULL
+mes1 <- melt(data = mes1, variable = "Mes", id = c(1,14,15)) 
+mes1 <- subset(mes1, Estado == "Total")
+mes1 <- subset(mes1, Tipo == "General")
+
+#Gráfica del total por año y estado.
+ggplot(data = mes1, aes(Ano, value, fill = Mes)) + geom_bar(stat="identity")  + facet_wrap(~ Mes, ncol = 1) + labs(title = "Intoxicación por Picaduras de Alacrán (Población general)", x = "Año", y = "Casos de intoxicación") + theme_bw() + theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5), strip.text = element_text(face = "bold"), strip.background = element_blank(), panel.border = element_rect(colour = grey(.90)), axis.ticks = element_line(colour=grey(.90), size = .5), axis.text = element_text(colour=grey(.55)), axis.title = element_text(colour=grey(.45)), legend.key = element_blank()) + guides(fill=FALSE)
+
+mes2 <- mes[c(1,2,16)]
+mes2 <- subset(mes2, Tipo == "General")
+mes2 <- subset(mes2, Estado != "Total")
+
+#Gráfica de Tufte.
+ggplot() + geom_tufteboxplot(data = mes2, mapping = aes(Estado, Total), outlier.shape = NA) + labs(title = "Intoxicación por picadura de alacrán 2003 a 2013", x = "Estado", y = "Casos de intoxicación")  + theme(axis.text.x  = element_text(angle=90, vjust=0.5, size=16)) + coord_cartesian(ylim=c(0,70000))
+#Nota: los warnings en esta gráfica se deben a que eliminamos los outliers ya que los boxplots de Tufte no los consideran.
+
+#Cargamos el mapa de México.
+load("./DATOS/PROCESADOS/MapaMexico.RData")
+
+vec <- 1:32
+mes3 <- aggregate(.~ Estado,data=mes2, sum)
+mes3$Tipo <- vec
+colnames(mes3)[3] <- "Numero"
+for(j in 1:9){
+  mes3$Numero[j] <- paste("0",j, sep ="")
+}
+mes3[,3] <- as.character(mes3[,3])
+mapa <- mapa.Mexico
+for(i in 1:nrow(mapa)){
+  for(j in 1:32){
+    if(mapa$id[i] == mes3$Numero[j])
+    mapa$picaduras[i] <- mes3$Total[j]
+  }
+}
+
+#Gráfica que muestra comparación entre estados.
+ggplot(mapa, aes(x=long, y=lat)) + geom_polygon(aes(group=group, fill=picaduras), col=NA,lwd=0) + scale_colour_gradient(low='white', high='grey20') + scale_colour_grey() + scale_y_continuous(breaks = NULL, labels = comma) + scale_x_continuous(breaks = NULL) + xlab("") + ylab("") + theme(panel.background = element_rect(fill = rgb(78/255,179/255,211/255,.1), colour = "white"))+ labs(title = "Intoxicación por Picaduras de Alacrán  2003 a 2013") + guides(fill=guide_legend(title="Casos de Intoxicación"))
+
+mes4 <- mes
+mes4$Total <- NULL
+mes4 <- melt(data = mes4, variable = "Mes", id = c(1,14,15)) 
+mes4 <- subset(mes4, Estado != "Total")
+mes4 <- subset(mes4, Tipo != "General")
+
+#Calculamos el total de picaduras a hombres y mujeres desde 2003 a 2013.
+Tot <- aggregate(.~ Tipo, data = mes4, sum)
+Tot <- Tot[c(1,5)]
+names(Tot)[2] <- "Total"
+Tot
+
+#Gráfica de mujeres y hombres por año, mes y estado.
+ggplot(mes4, aes(x=Ano, y=value, fill=Tipo)) + geom_bar(stat = "identity", position = "dodge") + facet_grid(Mes ~ Estado) + theme(axis.text.x = element_blank()) + labs(title = "Casos de intoxicación Hombres y Mujeres", x = "Año", y = "Casos de intoxicación") + scale_fill_manual(values=c("blue", "red"))
+
+mes5 <- mes
+mes5 <- subset(mes5, Estado != "Total")
+mes5$Total <- NULL
+mes5 <- melt(data = mes5, variable = "Mes", id = c(1,14,15))
+mes5 <- subset(mes5, Tipo == "General")
+
+#Gráfica de barras que relaciona los casos de intoxicación, estado, año y mes.
+ggplot(mes5, aes(x=Mes, y=value, group = Estado)) + geom_bar(aes(Mes, value, colour = Estado),stat = "identity", position = "identity") + facet_wrap(~ Estado, ncol = 8, nrow = 4) + theme(axis.text.x = element_text(size = rel(.9), angle = 90, hjust = 1)) + theme(legend.position="none") + labs(title = "Gráfica de barras por estado y mes", x = "Mes", y = "Casos de intoxicación")
+
+```
+
+```{r Guardar archivos procesados}
+#Guardamos el archivo principal, es decir, el que resultó por la unión de los 33 data frames.
+write.csv(mes, file="./DATOS/PROCESADOS/ReportePorMeses.csv", row.names=F)
+
+#Guardamos el archivo pero cambiando la organización de la tabla al formato largo.
+mes6 <- mes
+mes6$Total <- NULL
+mes6 <- melt(data = mes6, variable = "Mes", id = c(1,14,15)) 
+write.csv(mes6, file="./DATOS/PROCESADOS/ReportePorAnoMes.csv", row.names=F)
+```
+
+```{r Informacion de la sesion}
+sessionInfo()
+```
