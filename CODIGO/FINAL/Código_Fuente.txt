@@ -1,0 +1,277 @@
+```{r Ajustes, echo = FALSE, message = FALSE, results = 'hide'}
+directorio <- "/Users/jcdf_resident/Documents/ITAM/Estadística Aplicada I/Proyecto"
+setwd(directorio)
+knitr::opts_knit$set(root.dir = directorio)
+
+knitr::opts_chunk$set(fig.path = "GRAFICAS/FINALES/Figuras_", fig.align = 'center',
+                      fig.width = 12, fig.height = 8, 
+                      cache.path = "CACHE/Cache_", cache = TRUE, 
+                      eval = TRUE, 
+                      warning = FALSE, message = FALSE,
+                      echo = TRUE, 
+                      comment = NA)
+paquetes.utilizados <- c("plyr","reshape2","ggplot2","knitr","xtable")
+paquetes.instalados <- rownames(installed.packages())
+paquetes.por.instalar <- setdiff(paquetes.utilizados,paquetes.instalados)
+
+if(length(paquetes.por.instalar)!=0)install.packages(paquetes.por.instalar)
+lapply(paquetes.utilizados, library,character.only=TRUE)
+```
+
+
+```{r Lectura de Archivos}
+fuente <- NULL
+#Leemos los archivos "Generales"
+for (i in 1:11){
+fuente[[i]] <- read.csv(paste("./DATOS/BRUTOS/FD/",i+2002,"G.csv",sep=""),sep=",", header= TRUE,stringsAsFactors=TRUE,na.strings=c("NA","S.R.","S/R"), fileEncoding="latin1")
+fuente[[i]]$ano <- as.numeric(2002+i)
+fuente[[i]]$tipo <- "General"
+}
+#Leemos los archivos "Hombres"
+for (i in 12:22){
+fuente[[i]] <- read.csv(paste("./DATOS/BRUTOS/FD/",i+1991,"H.csv",sep=""),sep=",", header= TRUE,stringsAsFactors=TRUE,na.strings=c("NA","S.R.","S/R"), fileEncoding="latin1")
+fuente[[i]]$ano <- as.numeric(1991+i)
+fuente[[i]]$tipo <- "Hombres"
+}
+#Leemos los archivos "Mujeres"
+for (i in 23:33){
+fuente[[i]] <- read.csv(paste("./DATOS/BRUTOS/FD/",i+1980,"M.csv",sep=""),sep=",", header= TRUE,stringsAsFactors=TRUE,na.strings=c("NA","S.R.","S/R"), fileEncoding="latin1")
+fuente[[i]]$ano <- as.numeric(1980+i)
+fuente[[i]]$tipo <- "Mujeres"
+}
+
+#Ponemos el nombre de las columnas iguales en los 33 archivos
+for(i in 1:33){
+ names(fuente[[i]]) <- c("Estado","Salud",  "IMSS.ORD",	"ISSSTE",	"IMSS.OP",	"DIF",	"PEMEX",	"SEDENA",	"SEMAR","Otras",	"Total","Ano","Tipo")}
+
+#Convertimos la lista en data frame
+fuente <- ldply(fuente,data.frame)
+```
+
+```{r Limpieza Datos}
+fuente$Estado <- gsub("[ ]{1,}$","",fuente$Estado)
+fuente$Estado <- gsub(".*M.x.*","Mexico",fuente$Estado)
+fuente$Estado <- gsub(".*Mich.*","Michoacan",fuente$Estado)
+fuente$Estado <- gsub(".*San.*","San Luis Potosi",fuente$Estado)
+fuente$Estado <- gsub(".*Nue.*","Nuevo Leon",fuente$Estado)
+fuente$Estado <- gsub(".*Yuc.*","Yucatan",fuente$Estado)
+fuente$Estado <- gsub(".*Quer.*","Queretaro",fuente$Estado)
+fuente$Estado <- gsub(".*Tot.*|.*TOT.*","Total",fuente$Estado)
+fuente$Estado <- gsub(".*Su.*","Baja California Sur",fuente$Estado)
+fuente$Estado <- as.factor(fuente$Estado)
+fuente$Estado <- ordered(fuente$Estado)
+fuente$Ano <- as.factor(fuente$Ano)
+fuente$Ano <- ordered(fuente$Ano)
+fuente$Tipo <- as.factor(fuente$Tipo)
+fuente$Tipo <- ordered(fuente$Tipo)
+
+```
+
+
+
+```{r Validaciones}
+#Numero de NA's
+sum(is.na(fuente))
+
+#Completitud
+mean(is.na(fuente))
+
+
+#Faltantes por variable
+sapply(fuente, function(x) {mean(is.na(x))}) 
+
+#N?mero de registros duplicados
+sum(duplicated(fuente))
+
+#Proporci?n de registros duplicado
+mean(duplicated(fuente))
+
+#Validaci?n de que Masculino+Femenino=General
+tipo <- aggregate(.~ Tipo,data=fuente, sum)
+
+for (i in 3:12){
+tipo[4,i] <- tipo[1,i]-tipo[2,i]-tipo[3,i]
+}
+tipo
+
+#Validacion de suma de fuentes =Total
+validacion.general <- 0
+validacion.hombres <- 0
+validacion.mujeres <- 0
+for(i in 3:11){
+ validacion.general <- validacion.general+tipo[1,i]
+  validacion.hombres <- validacion.hombres+tipo[2,i]
+  validacion.mujeres <- validacion.mujeres+tipo[3,i]
+}
+
+tipo$total.sumado <- 0
+tipo[1,14] <- validacion.general
+tipo[2,14] <- validacion.hombres
+tipo[3,14] <- validacion.mujeres
+
+tipo$diferencia.totales <- 0
+tipo[1,15]=tipo[1,14]-tipo[1,12]
+tipo[2,15]=tipo[2,14]-tipo[2,12]
+tipo[3,15]=tipo[3,14]-tipo[3,12]
+
+tipo[c(1,2,3),c(12,14,15)]
+
+#Vemos que las diferencias en ambas validaciones son 0's, por lo que la información es verídica. La prueba de rangos indica que igual estan estructurados de manera correcta, ninguna fuente proporcionó mas datos que el total reportado.
+```
+
+
+```{r Agrupacion por año}
+#Solo general
+fuente.por.anos <- subset(fuente,fuente$Estado=="Total"&fuente$Tipo=="General") 
+fuente.por.anos$Tipo <- NULL
+fuente.por.anos$Estado <- NULL
+fuente.por.anos$Total <- NULL
+fuente.por.anos <- melt(fuente.por.anos, variable="Fuente", id="Ano")
+
+
+
+#Grafica 1.
+ggplot(fuente.por.anos,aes(x=Fuente,y=value,fill=Fuente)) +geom_bar(ylim=c(0,200000),stat="identity")+theme_bw()+theme(axis.title.x=element_blank(),axis.title.y=element_blank(),axis.text.x=element_blank())+facet_wrap(~Ano)+ggtitle("Intoxicaciones registradas por fuentes distribuidas anualmente")+theme(plot.title=element_text(face="bold",lineheight=1))
+
+
+#Ahora agrupamos por total
+total <- subset(fuente,fuente$Estado=="Total"&fuente$Tipo=="General") 
+total$Tipo <- NULL
+total$Estado <- NULL
+total$Total <- NULL
+total <- melt(total, variable="Fuente", id="Ano")
+total$Ano <- NULL
+total<- aggregate(.~ Fuente,total,sum)
+
+#Grafica2.
+ggplot(total,aes(x=Fuente,y=value,fill=Fuente)) +geom_bar(ylim=c(0,200000),stat="identity")+theme_bw()+theme(axis.title.x=element_blank(),axis.title.y=element_blank())+guides(fill=FALSE)+ggtitle("Intoxicaciones totales registradas por fuentes \n Periodo 2003-2013")+theme(plot.title=element_text(face="bold",lineheight=1))
+
+
+                                                                                                               
+```
+
+```{r Grafica de NA}
+
+#NA's y reportes de intoxicaciones 0 por institucion
+fuente.na <- subset(fuente,fuente$Estado!="Total"&fuente$Tipo=="General")
+fuente.na$Tipo <- NULL
+fuente.na$Ano <- NULL
+fuente.na$Total <- NULL
+fuente.na <- melt(fuente.na, variable="Fuente", id="Estado")
+fuente.na <- subset(fuente.na,fuente.na$value==0|fuente.na$value==NA)
+fuente.na$Estado <- NULL
+fuente.na$Conteo <- 1
+fuente.na <- aggregate(.~ Fuente,fuente.na,sum)
+
+#Grafica 3
+ggplot(fuente.na,aes(x=Fuente,y=Conteo,fill=Fuente)) +geom_bar(ylim=c(0,15),stat="identity")+theme_bw()+guides(fill=FALSE)+theme(axis.title.x=element_blank(),axis.title.y=element_blank())+ggtitle("Número de veces en que la institución no reportó incidentes \n Periodo 2003-2013")+theme(plot.title=element_text(face="bold",lineheight=1))
+
+```
+
+```{r Agrupacion por Estado}
+#Reporte de Estados por Fuente
+fuente.estados <- subset(fuente,fuente$Tipo=="General"&fuente$Estado!="Total")
+fuente.estados$Tipo <- NULL
+fuente.estados$Total <- NULL
+fuente.estados$Ano <- NULL
+fuente.estados<- melt(fuente.estados, variable="Fuente", id="Estado")
+fuente.estados<- aggregate(.~ Estado+Fuente,fuente.estados,sum)
+fuente.estados$Fuente <- as.factor(fuente.estados$Fuente)
+fuente.estados$Estado <- as.factor(fuente.estados$Estado)
+
+fuente.estados1 <- subset(fuente.estados, fuente.estados$Estado=="Guerrero"|fuente.estados$Estado=="Guanajuato"|fuente.estados$Estado=="Michoacan"|fuente.estados$Estado=="Morelos"|fuente.estados$Estado=="Jalisco"|fuente.estados$Estado=="Puebla")
+
+
+fuente.estados2 <- subset(fuente.estados, fuente.estados$Estado=="Colima"|fuente.estados$Estado=="Durango"|fuente.estados$Estado=="Mexico"|fuente.estados$Estado=="Nayarit"|fuente.estados$Estado=="Oaxaca"|fuente.estados$Estado=="Queretaro"|fuente.estados$Estado=="Sinaloa"|fuente.estados$Estado=="Sonora"|fuente.estados$Estado=="Zacatecas"|fuente.estados$Estado=="Aguascalientes")
+
+fuente.estados3 <- subset(fuente.estados, fuente.estados$Estado!="Guerrero"&fuente.estados$Estado!="Guanajuato"&fuente.estados$Estado!="Michoacan"&fuente.estados$Estado!="Morelos"&fuente.estados$Estado!="Jalisco"&fuente.estados$Estado!="Puebla"&fuente.estados$Estado!="Colima"&fuente.estados$Estado!="Durango"&fuente.estados$Estado!="Mexico"& fuente.estados$Estado!="Nayarit"&fuente.estados$Estado!="Oaxaca"&fuente.estados$Estado!="Queretaro"&fuente.estados$Estado!="Sinaloa"&fuente.estados$Estado!="Sonora"&fuente.estados$Estado!="Zacatecas"&fuente.estados$Estado!="Aguascalientes")
+
+#Grafica 4
+ggplot(fuente.estados1,aes(x=Fuente,y=value,fill=Fuente)) +geom_bar(stat="identity")+theme_bw()+theme(axis.title.x=element_blank(),axis.title.y=element_blank(),axis.text.x=element_blank())+facet_wrap(~Estado)+ scale_y_continuous(breaks=seq(0,1000000,50000))+ggtitle("Número de intoxicaciones reportadas por cada institución \n Periodo 2003-2013 V.1")+theme(plot.title=element_text(face="bold",lineheight=1))
+
+#Grafica 5
+ggplot(fuente.estados2,aes(x=Fuente,y=value,fill=Fuente)) +geom_bar(stat="identity")+theme_bw()+theme(axis.title.x=element_blank(),axis.title.y=element_blank(),axis.text.x=element_blank())+facet_wrap(~Estado)+ scale_y_continuous(breaks=seq(0,250000,25000))+ggtitle("Número de intoxicaciones reportadas por cada institución \n Periodo 2003-2013 V.2")+theme(plot.title=element_text(face="bold",lineheight=1))                                                                                                                                                                                      
+
+#Grafica 6
+ggplot(fuente.estados3,aes(x=Fuente,y=value,fill=Fuente)) +geom_bar(stat="identity")+theme_bw()+theme(axis.title.x=element_blank(),axis.title.y=element_blank(),axis.text.x=element_blank())+facet_wrap(~Estado)+ scale_y_continuous(breaks=seq(0,250000,1150))+ggtitle("Número de intoxicaciones reportadas por cada institución \n Periodo 2003-2013 V.3")+theme(plot.title=element_text(face="bold",lineheight=1))
+
+
+```
+
+```{r Agrupacion por genero} 
+#Agrupacion por genero
+genero <- subset(fuente,fuente$Tipo!="General"& fuente$Estado=="Total")
+head(genero)
+genero$Estado <- NULL
+genero$Total <- NULL
+genero$Ano <- NULL
+genero<- aggregate(.~ Tipo,genero,sum)
+genero<- melt(genero, variable="Fuente",id="Tipo")
+
+#Grafica 7
+ggplot(genero, aes(x=Fuente, y=value ,fill=Tipo))+geom_bar(stat="identity",position="dodge")+theme_bw()+theme(axis.title.x=element_blank(),axis.title.y=element_blank())+ggtitle("Por género")+theme(plot.title=element_text(face="bold",lineheight=1))+ggtitle("Número de intoxicaciones reportadas por cada institución por género \n Periodo 2003-2013")+theme(plot.title=element_text(face="bold",lineheight=1))+ scale_y_continuous(breaks=seq(0,9990000,20000),options(scipen=7))+scale_fill_manual(values=c("blue","red"))
+
+
+```
+
+```{r  Guardar archivos procesado}
+write.table(fuente,file="./DATOS/PROCESADOS/ReportePorFuentes.csv",sep=",",row.names=FALSE)
+
+write.table(fuente.por.anos,file="./DATOS/PROCESADOS/ReportePorAnoFuente.csv",sep=",",row.names=FALSE)
+
+```
+
+
+```{r Diccionario de Datos}
+variables <- c("Salud",  "IMSS.ORD","IMSS.OP","ISSSTE",	"DIF",	"PEMEX",	"SEDENA",	"SEMAR")
+
+
+descripcion.variables <- c("Secretaría de la Salud", 
+                           "Instituto Mexicano del Seguro Social (Ordinario)",
+                           "Instituto Mexicano del Seguro Social (Oportunidades)", 
+                           "Instituto de Seguridad y Servicios Sociales de los Trabajadores del Estado",
+                           "Desarrollo Integral de la Familia",
+                           "Petróleos Mexicanos",
+                           "Secretaría de la Defensa Nacional",
+                           "Secretaría de Marina")
+                           
+                           ligas <- c( "http://www.salud.gob.mx/",
+                                       "http://www.imss.gob.mx/",
+                                       "http://www.imss.gob.mx/",
+                                       "http://www2.issste.gob.mx:8080/",
+                                       "http://sn.dif.gob.mx/",
+                                       "http://www.pemex.com/Paginas/default.aspx#.VFBQcPmG-oM",
+                                       "http://www.sedena.gob.mx/inicio",
+                                       "http://www.semar.gob.mx/"
+                                       
+            
+
+           )
+layout <- cbind(variables, descripcion.variables, ligas)
+rownames(layout) <- NULL 
+colnames(layout) <- c("Variable", "Descripcion de la variable", "Liga")
+
+# Generamos una tabla con el layout en formato html.
+tabla.descripcion <- print.xtable(xtable(layout), type = "html", sanitize.text.function=function(x){x})
+tabla.descripcion <- gsub("</TH> <TH>","</TH> <TD>", tabla.descripcion)
+
+# Generamos el html en formato md.
+cat(paste0("# Diccionario de datos\n", 
+           "A continuacion se describen las variables utilizadas:\n", 
+           tabla.descripcion, 
+           "Las observaciones codificadas S.R. , se le asignaron el valor de NA",
+           "\nFuente:http://www.epidemiologia.salud.gob.mx/anuario/html/anuarios.html"), 
+    file = "./DATOS/PROCESADOS/TemporalFN.md"
+  )
+
+# Genera el layout en formato html y elimina el archivo temporal.
+knit2html(input = "./DATOS/PROCESADOS/TemporalFN.md", output = "./DATOS/PROCESADOS/Layout.html")
+unlink("TemporalFN.md")
+
+
+```
+
+```{r Informacion de la sesion}
+sessionInfo()
+```
+

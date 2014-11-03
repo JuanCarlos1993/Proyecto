@@ -4,7 +4,7 @@ Proyecto Intoxicación por picadura de alacrán     03/11/14
 Información acerca de git.
 
 Repositorio      https://github.com/JuanCarlos1993/Proyecto
-Commits          4
+Commits          5
 
 ==========================================================================================
 
@@ -30,7 +30,7 @@ información acerca de las instituciones.
 limpieza y organización.
 
 
-4. En la carpeta CODIGO se incluyen 3 R-Markdown que corresponden al análisis de casos 
+4. En la carpeta CODIGO se incluyen 3 Archivos.txt que corresponden al análisis de casos 
 de intoxicación por picadura de alacrán por mes, grupo de edad y fuente.
 
  
@@ -39,7 +39,7 @@ preguntas con respecto al tema, y un resumen ejecutivo que corresponde a los hal
 después del análisis de los datos.
 
 
-6. La carpeta FIGURAS incluye todas las gráficas obtenidas en la realización del 
+6. La carpeta GRAFICAS incluye todas las gráficas obtenidas en la realización del 
 proyecto, si se quiere mayor información para entender mejor las gráficas abrir el 
 reporte técnico.
 
